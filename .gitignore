@@ -1,0 +1,29 @@
+# Security - Strictly ignore all environment variables and keys
+.env
+.env.*
+*.pem
+*.key
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# Supabase local state
+supabase/.temp/
+supabase/.branch/
+
+# IDE and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Documentation (Do not push to GitHub as per user request)
+Assets/
+Documents/
+Markdowns/
+Skills/
+Walkthrough/
