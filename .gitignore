@@ -22,7 +22,7 @@ Thumbs.db
 .vscode/
 
 # Documentation (Do not push to GitHub as per user request)
-Assets/
+/Assets/
 Documents/
 Markdowns/
 Skills/
