@@ -7,6 +7,7 @@ import { BottomMenu } from '@/components/ui/BottomMenu';
 import logo from '@/assets/Logo.png';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -34,6 +35,7 @@ export const Chat = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const navigate = useNavigate();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -111,7 +113,8 @@ export const Chat = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/chat', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -156,7 +159,7 @@ export const Chat = () => {
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Your browser does not support Speech Recognition.");
       return;
