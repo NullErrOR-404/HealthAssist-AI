@@ -54,7 +54,7 @@ app.add_middleware(
 gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 fallback_client = AsyncOpenAI(
-    api_key=os.getenv("FREELLMAPI_KEY"),
+    api_key=os.getenv("FREELLMAPI_KEY", "dummy_key_to_prevent_startup_crash"),
     base_url=os.getenv("FREELLMAPI_BASE_URL", "http://127.0.0.1:31415/v1")
 )
 
