@@ -133,11 +133,11 @@ def update_user_profile_tool(age: int = None, sex: str = None, weight: str = Non
         logger.error(f"Error updating profile tool: {e}")
         return {"status": "error", "message": str(e)}
 
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "ok"}
 
-@app.get("/profile")
+@app.get("/api/profile")
 def get_profile():
     profile = get_user_profile(MOCK_USER_ID)
     if not profile:
@@ -146,7 +146,7 @@ def get_profile():
         return {"user_id": MOCK_USER_ID, "age": None, "sex": None, "weight": None, "chronic_conditions": [], "allergies": []}
     return profile
 
-@app.post("/profile")
+@app.post("/api/profile")
 def update_profile(profile: ProfileData):
     updates = {"user_id": MOCK_USER_ID, **profile.model_dump(exclude_unset=True)}
     try:
@@ -155,14 +155,14 @@ def update_profile(profile: ProfileData):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/profile/onboarding-status")
+@app.get("/api/profile/onboarding-status")
 def get_onboarding_status():
     profile = get_user_profile(MOCK_USER_ID)
     if not profile:
         return {"hasCompletedOnboarding": False}
     return {"hasCompletedOnboarding": profile.get("has_completed_onboarding", False) or False}
 
-@app.post("/profile/complete-onboarding")
+@app.post("/api/profile/complete-onboarding")
 def complete_onboarding():
     try:
         supabase.table("profiles").upsert(
@@ -173,7 +173,7 @@ def complete_onboarding():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/chat")
+@app.post("/api/chat")
 @limiter.limit("5/minute")
 async def chat_endpoint(request: Request, body: ChatRequest):
     user_message = body.message
@@ -322,7 +322,7 @@ async def generate_with_fallback(system_instruction: str, user_message: str) -> 
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/disease-library")
+@app.post("/api/disease-library")
 @limiter.limit("5/minute")
 async def disease_library_endpoint(request: Request, body: DiseaseSearchRequest):
     disease = body.disease
@@ -382,7 +382,7 @@ CRITICAL FORMATTING INSTRUCTION: Use a beautiful mix of short, readable paragrap
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/drug-info")
+@app.post("/api/drug-info")
 @limiter.limit("5/minute")
 async def drug_info_endpoint(request: Request, body: DrugSearchRequest):
     drug = body.drug
@@ -450,7 +450,7 @@ CRITICAL FORMATTING INSTRUCTION: Use a beautiful mix of short, readable paragrap
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/drug-interactions")
+@app.post("/api/drug-interactions")
 @limiter.limit("5/minute")
 async def drug_interactions_endpoint(request: Request, body: DrugInteractionRequest):
     drugs = body.drugs
@@ -471,7 +471,7 @@ Format your output as clean Markdown. If no interactions are found, state that c
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/anatomy-atlas")
+@app.post("/api/anatomy-atlas")
 @limiter.limit("5/minute")
 async def anatomy_atlas_endpoint(request: Request, body: AnatomyRequest):
     structure = body.structure
@@ -494,7 +494,7 @@ Be concise, rigorous, and suitable for medical students."""
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/clinical-case")
+@app.post("/api/clinical-case")
 @limiter.limit("5/minute")
 async def clinical_case_endpoint(request: Request, body: ClinicalCaseRequest):
     specialty = body.specialty
@@ -524,7 +524,7 @@ Provide detailed answers to each question."""
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
 
-@app.post("/flashcards")
+@app.post("/api/flashcards")
 @limiter.limit("5/minute")
 async def flashcards_endpoint(request: Request, body: FlashcardRequest):
     topic = body.topic
