@@ -54,7 +54,7 @@ export const DrugInfo: React.FC = () => {
     setError(null);
     setContent(null);
     try {
-      const res = await fetch('http://127.0.0.1:8000/drug-info', {
+      const res = await fetch('/api/drug-info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ drug: searchQuery })

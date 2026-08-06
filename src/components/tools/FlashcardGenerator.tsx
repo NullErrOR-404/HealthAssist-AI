@@ -19,7 +19,7 @@ export const FlashcardGenerator: React.FC = () => {
     if (!topic.trim()) return;
     setLoading(true); setError(null); setCards([]); setCurrentIndex(0); setShowAnswer(false);
     try {
-      const res = await fetch('http://127.0.0.1:8000/flashcards', {
+      const res = await fetch('/api/flashcards', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic })
       });

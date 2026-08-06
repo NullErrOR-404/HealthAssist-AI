@@ -24,7 +24,7 @@ export const DiseaseLibraryDrawer: React.FC<DiseaseLibraryDrawerProps> = ({ isOp
     setContent(null);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/disease-library', {
+      const response = await fetch('/api/disease-library', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ disease: query })

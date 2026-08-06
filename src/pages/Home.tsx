@@ -17,7 +17,7 @@ export const Home = () => {
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/profile/onboarding-status');
+        const res = await fetch('/api/profile/onboarding-status');
         const data = await res.json();
         if (!data.hasCompletedOnboarding) {
           setShowOnboarding(true);

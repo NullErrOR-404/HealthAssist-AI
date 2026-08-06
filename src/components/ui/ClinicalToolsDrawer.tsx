@@ -1,22 +1,43 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowLeft, BookOpen, Stethoscope } from 'lucide-react';
+import { X, ArrowLeft, BookOpen, Stethoscope, Activity, Calculator, ShieldAlert, Book, FlaskConical, Dna } from 'lucide-react';
 import { DiseaseLibrary } from '../tools/DiseaseLibrary';
+import { DrugInfo } from '../tools/DrugInfo';
+import { AnatomyAtlas } from '../tools/AnatomyAtlas';
+import { ClinicalCaseSimulator } from '../tools/ClinicalCaseSimulator';
+import { DrugInteractionChecker } from '../tools/DrugInteractionChecker';
+import { FlashcardGenerator } from '../tools/FlashcardGenerator';
+import { LabValueReference } from '../tools/LabValueReference';
+import { MedicalCalculators } from '../tools/MedicalCalculators';
 
 interface ClinicalToolsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ToolId = 'disease' | null;
+type ToolId = 'disease' | 'drug_info' | 'anatomy' | 'case_sim' | 'drug_interact' | 'flashcards' | 'lab_values' | 'calculators' | null;
 
 const TOOLS = [
   { id: 'disease' as ToolId, name: 'Disease Library', desc: 'Research syllabus generator', icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'drug_info' as ToolId, name: 'Drug Information', desc: 'Comprehensive pharmacology database', icon: FlaskConical, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { id: 'anatomy' as ToolId, name: 'Anatomy Atlas', desc: 'Interactive 3D body maps', icon: Dna, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  { id: 'case_sim' as ToolId, name: 'Case Simulator', desc: 'Practice with virtual patients', icon: Activity, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+  { id: 'drug_interact' as ToolId, name: 'Drug Interactions', desc: 'Check for medication conflicts', icon: ShieldAlert, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+  { id: 'flashcards' as ToolId, name: 'Flashcards', desc: 'AI-generated study materials', icon: Book, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+  { id: 'lab_values' as ToolId, name: 'Lab Values', desc: 'Reference ranges & interpretations', icon: Stethoscope, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+  { id: 'calculators' as ToolId, name: 'Medical Calculators', desc: 'Clinical scoring & algorithms', icon: Calculator, color: 'text-orange-500', bg: 'bg-orange-500/10' },
 ];
 
 const ToolContent: React.FC<{ toolId: ToolId }> = ({ toolId }) => {
   switch (toolId) {
     case 'disease': return <DiseaseLibrary />;
+    case 'drug_info': return <DrugInfo />;
+    case 'anatomy': return <AnatomyAtlas />;
+    case 'case_sim': return <ClinicalCaseSimulator />;
+    case 'drug_interact': return <DrugInteractionChecker />;
+    case 'flashcards': return <FlashcardGenerator />;
+    case 'lab_values': return <LabValueReference />;
+    case 'calculators': return <MedicalCalculators />;
     default: return null;
   }
 };

@@ -1,0 +1,13 @@
+{
+  "buildCommand": "bash vercel-build.sh",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

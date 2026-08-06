@@ -54,7 +54,7 @@ export const DiseaseLibrary: React.FC = () => {
     setError(null);
     setContent(null);
     try {
-      const res = await fetch('http://127.0.0.1:8000/disease-library', {
+      const res = await fetch('/api/disease-library', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ disease: searchQuery })

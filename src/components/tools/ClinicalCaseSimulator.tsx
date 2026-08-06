@@ -14,7 +14,7 @@ export const ClinicalCaseSimulator: React.FC = () => {
   const generateCase = async () => {
     setLoading(true); setError(null); setContent(null);
     try {
-      const res = await fetch('http://127.0.0.1:8000/clinical-case', {
+      const res = await fetch('/api/clinical-case', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ specialty })
       });

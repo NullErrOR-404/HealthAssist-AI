@@ -37,7 +37,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
   const handleSkip = async () => {
     try {
-      await fetch('http://127.0.0.1:8000/profile/complete-onboarding', { method: 'POST' });
+      await fetch('/api/profile/complete-onboarding', { method: 'POST' });
     } catch (e) {
       // Silently fail
     }
@@ -60,7 +60,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       if (allergies.length > 0) profilePayload.allergies = allergies;
 
       if (Object.keys(profilePayload).length > 0) {
-        await fetch('http://127.0.0.1:8000/profile', {
+        await fetch('/api/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profilePayload)
@@ -68,7 +68,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       }
 
       // Mark onboarding complete
-      await fetch('http://127.0.0.1:8000/profile/complete-onboarding', { method: 'POST' });
+      await fetch('/api/profile/complete-onboarding', { method: 'POST' });
       onComplete();
     } catch (e) {
       console.error('Onboarding save error:', e);

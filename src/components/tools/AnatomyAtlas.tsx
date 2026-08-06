@@ -14,7 +14,7 @@ export const AnatomyAtlas: React.FC = () => {
     if (!query.trim()) return;
     setLoading(true); setError(null); setContent(null);
     try {
-      const res = await fetch('http://127.0.0.1:8000/anatomy-atlas', {
+      const res = await fetch('/api/anatomy-atlas', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ structure: query })
       });
