@@ -159,7 +159,6 @@ def update_user_profile_tool(
     chronic_conditions: list[str] = None, allergies: list[str] = None, current_medications: list[str] = None, family_history: list[str] = None
 ):
     """
-    """
     Updates the user's health profile in the database. Call this tool when the user mentions their name, age, sex, height, weight, blood type, smoking status, emergency contact, primary physician, chronic conditions, allergies, current medications, or family history in conversation.
     """
     pass
