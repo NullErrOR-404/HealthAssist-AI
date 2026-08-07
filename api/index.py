@@ -216,15 +216,14 @@ def execute_doctor_search(specialty: str, latitude: float, longitude: float):
         if not latitude or not longitude:
             return {"status": "error", "message": "Location not provided by the user."}
 
-        # Overpass API query for doctors (highly generic since OSM is sparse with specialties)
-        query = f\"\"\"
+        query = f"""
         [out:json];
         (
           node["amenity"="doctors"](around:5000, {latitude}, {longitude});
           node["healthcare"="doctor"](around:5000, {latitude}, {longitude});
         );
         out tags;
-        \"\"\"
+        """
         
         response = httpx.post("https://overpass-api.de/api/interpreter", data=query, timeout=10.0)
         data = response.json()
