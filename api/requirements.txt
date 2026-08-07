@@ -117,6 +117,8 @@ python-dotenv==1.2.2
     # via
     #   backend
     #   pydantic-settings
+python-multipart==0.0.32
+    # via backend
 realtime==2.31.0
     # via supabase
 requests==2.34.2
