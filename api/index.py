@@ -51,7 +51,7 @@ app.add_middleware(
 )
 
 # Initialize AI Clients
-gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY", "dummy_gemini_key"))
 
 fallback_client = AsyncOpenAI(
     api_key=os.getenv("FREELLMAPI_KEY", "dummy_key_to_prevent_startup_crash"),
@@ -59,8 +59,8 @@ fallback_client = AsyncOpenAI(
 )
 
 # Initialize Supabase Client
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") # Use service role for backend operations
+supabase_url = os.getenv("SUPABASE_URL", "https://dummy.supabase.co")
+supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "dummy_key") # Use service role for backend operations
 supabase: Client = create_client(supabase_url, supabase_key)
 
 # Guest Rate Limiting
@@ -451,6 +451,11 @@ def complete_onboarding(user_id: str = Depends(get_current_user)):
 @app.post("/api/chat")
 @limiter.limit("5/minute")
 async def chat_endpoint(request: Request, body: ChatRequest, user_id: str = Depends(get_current_user)):
+    if os.getenv("GEMINI_API_KEY", "dummy_gemini_key") == "dummy_gemini_key":
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY is not configured in the backend environment.")
+    if os.getenv("SUPABASE_URL", "https://dummy.supabase.co") == "https://dummy.supabase.co":
+        raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured in the backend environment.")
+    
     user_message = body.message
     llm_engine = body.llm_engine
     
