@@ -15,6 +15,8 @@ import {
   MessageSquare,
   Activity,
   Settings,
+  BarChart2,
+  Folder,
 } from "lucide-react";
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -25,6 +27,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 const MAIN_NAV = [
   { icon: Activity, name: "home", activeColor: "text-red-500" },
   { icon: MessageSquare, name: "chat", activeColor: "text-green-500" },
+  { icon: BarChart2, name: "dashboard", activeColor: "text-indigo-500" },
+  { icon: Folder, name: "vault", activeColor: "text-yellow-500" },
   { icon: MapPin, name: "maps", activeColor: "text-purple-500" },
   { icon: Settings, name: "settings", activeColor: "text-blue-500" },
 ];
@@ -124,6 +128,8 @@ export const BottomMenu = () => {
                 const isActive = view === name;
                 const isRouteActive = (name === "home" && location.pathname === "/") || 
                                      (name === "chat" && location.pathname === "/chat") || 
+                                     (name === "dashboard" && location.pathname === "/dashboard") ||
+                                     (name === "vault" && location.pathname === "/vault") ||
                                      (name === "maps" && location.pathname === "/maps") || 
                                      (name === "settings" && location.pathname === "/settings") || 
                                      isActive;
@@ -138,6 +144,12 @@ export const BottomMenu = () => {
                         setView("default");
                       } else if (name === "chat") {
                         navigate("/chat");
+                        setView("default");
+                      } else if (name === "dashboard") {
+                        navigate("/dashboard");
+                        setView("default");
+                      } else if (name === "vault") {
+                        navigate("/vault");
                         setView("default");
                       } else if (name === "maps") {
                         navigate("/maps");

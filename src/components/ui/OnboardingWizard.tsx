@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, X, Heart, Activity, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 interface OnboardingWizardProps {
   onComplete: () => void;
@@ -18,6 +19,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
   const [allergyInput, setAllergyInput] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const { session } = useAuthStore();
 
   const stepIndex = STEPS.indexOf(step);
 
@@ -37,7 +39,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
   const handleSkip = async () => {
     try {
-      await fetch('/api/profile/complete-onboarding', { method: 'POST' });
+      await fetch('/api/profile/complete-onboarding', { 
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
     } catch (e) {
       // Silently fail
     }
@@ -62,13 +69,21 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       if (Object.keys(profilePayload).length > 0) {
         await fetch('/api/profile', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`
+          },
           body: JSON.stringify(profilePayload)
         });
       }
 
       // Mark onboarding complete
-      await fetch('/api/profile/complete-onboarding', { method: 'POST' });
+      await fetch('/api/profile/complete-onboarding', { 
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
       onComplete();
     } catch (e) {
       console.error('Onboarding save error:', e);

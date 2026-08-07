@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, BookOpen, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useAuthStore } from '@/store/authStore';
 
 interface DiseaseLibraryDrawerProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const DiseaseLibraryDrawer: React.FC<DiseaseLibraryDrawerProps> = ({ isOp
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { session } = useAuthStore();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,10 @@ export const DiseaseLibraryDrawer: React.FC<DiseaseLibraryDrawerProps> = ({ isOp
     try {
       const response = await fetch('/api/disease-library', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({ disease: query })
       });
 

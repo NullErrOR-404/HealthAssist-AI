@@ -6,7 +6,10 @@ import { Send, User, Bot, Paperclip, Mic, Menu, X, File as FileIcon } from 'luci
 import { BottomMenu } from '@/components/ui/BottomMenu';
 import logo from '@/assets/Logo.png';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AuthButton } from '@/components/ui/AuthButton';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useAuthStore } from '@/store/authStore';
+import { useLocationStore } from '@/store/locationStore';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -42,6 +45,8 @@ export const Chat = () => {
   const isListeningRef = useRef(false);
   const finalTranscriptRef = useRef('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { session, isGuest } = useAuthStore();
+  const { latitude, longitude } = useLocationStore();
   const [attachedFile, setAttachedFile] = useState<{ file: File, base64: string } | null>(null);
   const { llmEngine, toggleToolsDrawer } = useSettingsStore();
 
@@ -117,9 +122,16 @@ export const Chat = () => {
       const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
         },
-        body: JSON.stringify({ message: userText, llm_engine: llmEngine, ...filePayload })
+        body: JSON.stringify({ 
+          message: userText, 
+          llm_engine: llmEngine, 
+          latitude: latitude,
+          longitude: longitude,
+          ...filePayload 
+        })
       });
 
       if (!response.ok) {
@@ -167,7 +179,7 @@ export const Chat = () => {
 
     if (!recognitionRef.current) {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
@@ -237,6 +249,7 @@ export const Chat = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          <AuthButton />
           <ThemeToggle />
           <button onClick={() => navigate("/profile")} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground shadow-sm hover:scale-110 hover:-translate-y-1 transition-all duration-300">
             <User size={18} />
@@ -357,8 +370,18 @@ export const Chat = () => {
         
         <form onSubmit={handleSend} className="relative flex items-center shadow-lg rounded-2xl bg-card border border-border overflow-hidden focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent transition-all">
           <input type="file" ref={fileInputRef} className="hidden" accept="application/pdf,image/jpeg,image/png" onChange={handleFileSelect} />
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="p-4 text-gray-400 hover:text-blue-600 transition-colors">
-            <Paperclip size={20} />
+          <button 
+            type="button" 
+            onClick={() => {
+              if (isGuest) {
+                alert("Guest Mode: File uploads are disabled. Please sign up to use this feature.");
+                return;
+              }
+              fileInputRef.current?.click();
+            }} 
+            className="p-4 text-gray-400 hover:text-blue-600 transition-colors"
+          >
+            <Paperclip size={20} className={isGuest ? "opacity-50" : ""} />
           </button>
           
           <input 
@@ -372,27 +395,41 @@ export const Chat = () => {
             className="flex-1 py-4 px-2 outline-none text-foreground bg-transparent placeholder-muted-foreground font-medium"
           />
           
-          <button 
-            type="button" 
-            onClick={toggleListening}
-            className={`p-4 transition-colors relative ${isListening ? 'text-red-500' : 'text-gray-400 hover:text-blue-600'}`}
-          >
+          <div className="pr-2 flex gap-2">
             {isListening && (
-              <span className="absolute inset-0 flex items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-red-400 opacity-75"></span>
-              </span>
+              <button 
+                type="button" 
+                onClick={toggleListening}
+                className="p-2.5 rounded-xl transition-colors relative shadow-md bg-red-500 text-white"
+              >
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="animate-ping absolute inline-flex h-8 w-8 rounded-xl bg-red-400 opacity-75"></span>
+                </span>
+                <Mic size={18} className="relative z-10" />
+              </button>
             )}
-            <Mic size={20} className="relative z-10" />
-          </button>
+            
+            {(!isListening && !input.trim() && !attachedFile) && (
+              <button 
+                type="button" 
+                onClick={toggleListening}
+                className="p-2.5 rounded-xl transition-colors relative shadow-md bg-muted/50 text-gray-500 hover:bg-muted"
+              >
+                <Mic size={18} className="relative z-10" />
+              </button>
+            )}
 
-          <div className="pr-2">
-            <button 
-              type="submit" 
-              disabled={!input.trim() && !attachedFile}
-              className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              <Send size={18} />
-            </button>
+            {(input.trim() || attachedFile) ? (
+              <button 
+                type="submit" 
+                onClick={() => {
+                   if(isListening) toggleListening();
+                }}
+                className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-md"
+              >
+                <Send size={18} />
+              </button>
+            ) : null}
           </div>
         </form>
       </div>

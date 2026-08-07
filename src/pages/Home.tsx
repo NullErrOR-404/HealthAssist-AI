@@ -5,19 +5,28 @@ import { BottomMenu } from '@/components/ui/BottomMenu';
 import { Activity, HeartPulse, ActivitySquare, Stethoscope, AlertCircle, User, Menu } from 'lucide-react';
 import logo from '@/assets/Logo.png'; 
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AuthButton } from '@/components/ui/AuthButton';
 import { useSettingsStore } from '@/store/settingsStore';
 import { OnboardingWizard } from '@/components/ui/OnboardingWizard';
 import { AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '@/store/authStore';
 
 export const Home = () => {
   const navigate = useNavigate();
   const { toggleToolsDrawer } = useSettingsStore();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { session, isGuest } = useAuthStore();
 
   useEffect(() => {
     const checkOnboarding = async () => {
+      if (isGuest) return; // Skip onboarding for guest users
+      
       try {
-        const res = await fetch('/api/profile/onboarding-status');
+        const res = await fetch('/api/profile/onboarding-status', {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`
+          }
+        });
         const data = await res.json();
         if (!data.hasCompletedOnboarding) {
           setShowOnboarding(true);
@@ -115,6 +124,7 @@ export const Home = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          <AuthButton />
           <ThemeToggle />
           <button onClick={() => navigate("/profile")} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground shadow-sm hover:scale-110 hover:-translate-y-1 transition-all duration-300">
             <User size={18} />

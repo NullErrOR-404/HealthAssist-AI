@@ -11,18 +11,20 @@ interface AuthState {
   setLoading: (isLoading: boolean) => void;
   signOut: () => Promise<void>;
   guestLogin: () => void;
+  isGuest: boolean;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
   isLoading: true,
-  setUser: (user) => set({ user }),
-  setSession: (session) => set({ session }),
+  isGuest: false,
+  setUser: (user) => set({ user, isGuest: user?.id === 'guest-user-123' }),
+  setSession: (session) => set({ session, isGuest: session?.user?.id === 'guest-user-123' }),
   setLoading: (isLoading) => set({ isLoading }),
   signOut: async () => {
     await supabase.auth.signOut();
-    set({ user: null, session: null });
+    set({ user: null, session: null, isGuest: false });
   },
   guestLogin: () => {
     // Create a mock user and session for testing purposes
@@ -44,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: mockUser
     } as any;
     
-    set({ user: mockUser, session: mockSession });
+    set({ user: mockUser, session: mockSession, isGuest: true });
   }
 }));
 

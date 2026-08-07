@@ -5,10 +5,13 @@ import Home from './pages/Home';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Maps from './pages/Maps';
+import Dashboard from './pages/Dashboard';
+import Vault from './pages/Vault';
 import Login from './pages/Login';
 import Settings from './pages/Settings';
 import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
+import { useLocationStore } from './store/locationStore';
 import { Activity } from 'lucide-react';
 import { ClinicalToolsDrawer } from './components/ui/ClinicalToolsDrawer';
 import Lenis from 'lenis';
@@ -46,8 +49,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const { session } = useAuthStore();
+  const { session, isGuest } = useAuthStore();
   const { highContrast, textScale, isToolsDrawerOpen, toggleToolsDrawer } = useSettingsStore();
+  const { fetchLocation } = useLocationStore();
+
+  useEffect(() => {
+    fetchLocation();
+  }, [fetchLocation]);
   const location = useLocation();
 
   useEffect(() => {
@@ -98,7 +106,7 @@ function App() {
             path="/login" 
             element={
               <PageTransition>
-                {session ? <Navigate to="/" replace /> : <Login />}
+                {session && !isGuest ? <Navigate to="/" replace /> : <Login />}
               </PageTransition>
             } 
           />
@@ -128,6 +136,26 @@ function App() {
               <ProtectedRoute>
                 <PageTransition>
                   <Maps />
+                </PageTransition>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <PageTransition>
+                  <Dashboard />
+                </PageTransition>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/vault" 
+            element={
+              <ProtectedRoute>
+                <PageTransition>
+                  <Vault />
                 </PageTransition>
               </ProtectedRoute>
             } 

@@ -3,8 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Menu, User, LocateFixed, Search } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useLocationStore } from '@/store/locationStore';
 import logo from '@/assets/Logo.png';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { AuthButton } from '@/components/ui/AuthButton';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import { BottomMenu } from '@/components/ui/BottomMenu';
@@ -52,84 +54,28 @@ function ChangeView({ center }: { center: [number, number] }) {
 const Maps = () => {
   const { toggleToolsDrawer } = useSettingsStore();
   const navigate = useNavigate();
+  const { latitude, longitude, fetchLocation, loading: locationLoading } = useLocationStore();
   const [position, setPosition] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    handleLocateMe();
-  }, []);
+    fetchLocation();
+  }, [fetchLocation]);
 
-  const handleLocateMe = () => {
-    setLoading(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setPosition([pos.coords.latitude, pos.coords.longitude]);
-          fetchNearbyHospitals(pos.coords.latitude, pos.coords.longitude);
-        },
-        async (err) => {
-          console.warn("Browser location denied or failed, falling back to IP location...", err);
-          alert(`Native GPS Failed (Error ${err.code}: ${err.message}). Falling back to IP-based approximate location.`);
-          await fetchIpLocation();
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
-    } else {
-      fetchIpLocation();
+  useEffect(() => {
+    if (latitude && longitude) {
+      setPosition([latitude, longitude]);
+      fetchNearbyHospitals(latitude, longitude);
     }
-  };
+  }, [latitude, longitude]);
 
-  const fetchIpLocation = async () => {
-    try {
-      let lat: number | null = null;
-      let lon: number | null = null;
-
-      // 1. Try GeoJS
-      try {
-        const res = await fetch("https://get.geojs.io/v1/ip/geo.json");
-        const data = await res.json();
-        if (data.latitude && data.longitude) {
-          lat = parseFloat(data.latitude);
-          lon = parseFloat(data.longitude);
-        }
-      } catch (e) { console.warn("GeoJS failed", e); }
-
-      // 2. Try FreeIPAPI if GeoJS failed
-      if (!lat || !lon) {
-        try {
-          const res = await fetch("https://freeipapi.com/api/json");
-          const data = await res.json();
-          if (data.latitude && data.longitude) {
-            lat = data.latitude;
-            lon = data.longitude;
-          }
-        } catch (e) { console.warn("FreeIPAPI failed", e); }
-      }
-
-      // 3. Try ipapi.co as last resort
-      if (!lat || !lon) {
-        try {
-          const res = await fetch("https://ipapi.co/json/");
-          const data = await res.json();
-          if (data.latitude && data.longitude) {
-            lat = data.latitude;
-            lon = data.longitude;
-          }
-        } catch (e) { console.warn("ipapi.co failed", e); }
-      }
-
-      if (lat && lon) {
-        setPosition([lat, lon]);
-        fetchNearbyHospitals(lat, lon);
-      } else {
-        throw new Error("All IP location services failed");
-      }
-    } catch (e) {
-      console.error("Critical IP Location fallback failed", e);
-      setLoading(false);
-      fetchNearbyHospitals(position[0], position[1]); // Fallback to NYC
+  const handleLocateMe = async () => {
+    await fetchLocation();
+    if (latitude && longitude) {
+      setPosition([latitude, longitude]);
+      fetchNearbyHospitals(latitude, longitude);
     }
   };
 
@@ -210,6 +156,7 @@ const Maps = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          <AuthButton />
           <ThemeToggle />
           <button onClick={() => navigate("/profile")} className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground shadow-sm hover:scale-110 hover:-translate-y-1 transition-all duration-300">
             <User size={18} />
