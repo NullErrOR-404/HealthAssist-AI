@@ -521,7 +521,7 @@ CRITICAL RULES FOR RESPONDING:
 
         logger.info("Attempting primary LLM (Gemini Fast)...")
         chat = gemini_client.chats.create(
-            model='gemini-2.0-flash',
+            model='gemini-1.5-flash',
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
                 tools=[update_user_profile_tool, find_nearby_doctors_tool, log_vital_sign_tool, add_medication_tool, search_vault_tool]
@@ -615,23 +615,20 @@ CRITICAL RULES FOR RESPONDING:
 
     except APIError as e:
         logger.warning(f"Gemini API Error (Code: {e.code}): {e.message}")
-        if e.code == 429:
-            try:
-                fallback_response = await fallback_client.chat.completions.create(
-                    model="auto",
-                    messages=[
-                        {"role": "system", "content": system_instruction},
-                        {"role": "user", "content": fallback_user_content if len(fallback_user_content) > 1 or file_content else user_message}
-                    ]
-                )
-                return {
-                    "response": fallback_response.choices[0].message.content, 
-                    "provider": "freellmapi"
-                }
-            except Exception as fallback_err:
-                raise HTTPException(status_code=503, detail="All AI systems unavailable.")
-        else:
-            raise HTTPException(status_code=500, detail="An error occurred with the AI system.")
+        try:
+            fallback_response = await fallback_client.chat.completions.create(
+                model="auto",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": fallback_user_content if len(fallback_user_content) > 1 or file_content else user_message}
+                ]
+            )
+            return {
+                "response": fallback_response.choices[0].message.content, 
+                "provider": "freellmapi"
+            }
+        except Exception as fallback_err:
+            raise HTTPException(status_code=503, detail="All AI systems unavailable.")
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
@@ -639,7 +636,7 @@ CRITICAL RULES FOR RESPONDING:
 async def generate_with_fallback(system_instruction: str, user_message: str) -> str:
     try:
         chat = gemini_client.chats.create(
-            model='gemini-2.0-flash',
+            model='gemini-1.5-flash',
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction
             )
@@ -648,21 +645,18 @@ async def generate_with_fallback(system_instruction: str, user_message: str) -> 
         return response.text
     except APIError as e:
         logger.warning(f"Gemini API Error (Code: {e.code}): {e.message}")
-        if e.code == 429:
-            try:
-                fallback_response = await fallback_client.chat.completions.create(
-                    model="auto",
-                    messages=[
-                        {"role": "system", "content": system_instruction},
-                        {"role": "user", "content": user_message}
-                    ]
-                )
-                return fallback_response.choices[0].message.content
-            except Exception as fallback_err:
-                logger.error(f"Fallback FreeLLM API failed: {fallback_err}")
-                raise HTTPException(status_code=503, detail="All AI systems unavailable (Rate limited).")
-        else:
-            raise HTTPException(status_code=500, detail="AI provider error.")
+        try:
+            fallback_response = await fallback_client.chat.completions.create(
+                model="auto",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": user_message}
+                ]
+            )
+            return fallback_response.choices[0].message.content
+        except Exception as fallback_err:
+            logger.error(f"Fallback FreeLLM API failed: {fallback_err}")
+            raise HTTPException(status_code=503, detail="All AI systems unavailable.")
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
